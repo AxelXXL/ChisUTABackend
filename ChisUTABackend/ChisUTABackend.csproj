@@ -264,6 +264,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\ChismeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TokenController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
@@ -271,6 +272,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ChismeModel.cs" />
     <Compile Include="Models\ExtendModel.cs" />
     <Compile Include="Models\TokenModel.cs" />
     <Compile Include="Models\Users.cs" />
@@ -278,6 +280,7 @@
     <Compile Include="Services\API.cs" />
     <Compile Include="Services\Auth.cs" />
     <Compile Include="Services\BaseServices.cs" />
+    <Compile Include="Services\ChismeServices.cs" />
     <Compile Include="Services\UserServices.cs" />
     <Compile Include="Services\Security.cs" />
   </ItemGroup>
@@ -352,6 +355,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Chisme\" />
     <Folder Include="Views\Token\" />
     <Folder Include="Views\Users\" />
   </ItemGroup>
