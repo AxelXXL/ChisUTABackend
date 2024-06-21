@@ -1,6 +1,7 @@
 ﻿using ChisUTABackend.Models;
 using ChisUTABackend.Services;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -22,91 +23,127 @@ namespace ChisUTABackend.Controllers
 
         [Route("Post-Chisme")]
         [HttpPost]
-        public HttpResponseMessage Post(ChismeModel chisme)
+        public IHttpActionResult Post(ChismeModel chisme)
         {
-            _chismeServices.PostChisme(chisme);
-            if (ModelState.IsValid)
+            if (chisme != null)
             {
-                return new HttpResponseMessage(HttpStatusCode.OK)
+                if (chisme.Titulo == null)
                 {
-                    Content = new ObjectContent<ChismeModel>(chisme, new JsonMediaTypeFormatter())
-                };
+                    return BadRequest("Falta proporcionar el título");
+                }
+                if (chisme.Contexto == null)
+                {
+                    return BadRequest("Falta proporcionar el contexto");
+                }
+                if (chisme.Categorias == null)
+                {
+                    return BadRequest("Falta proporcionar la categoria");
+                }
+                _chismeServices.PostChisme(chisme);
+                return Ok(chisme);
             }
-            return new HttpResponseMessage(HttpStatusCode.Conflict)
-            {
-                Content = new StringContent("Los datos no cumplen con el modelo")
-            };
+            return Conflict();
         }
+
+
 
         [Route("Delete-Chisme")]
         [HttpDelete]
-        public HttpResponseMessage Delete(string id)
+        public IHttpActionResult Delete(string id)
         {
-            if (id != null)
+            if (string.IsNullOrEmpty(id))
             {
-                _chismeServices.DeleteChisme(id);
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("Chisme eliminado")
-                };
+                return BadRequest("Falta el parámetro ID para hacer la consulta");
             }
 
-            return new HttpResponseMessage(HttpStatusCode.Conflict)
+            var chisme = _chismeServices.GetOneChisme(id);
+
+            if (chisme == null)
             {
-                Content = new StringContent("parametro id necesario")
-            };
+                return Content(HttpStatusCode.NotFound, "No hay coincidencias en la BD");
+            }
+
+            _chismeServices.DeleteChisme(id);
+            return Ok("Chisme eliminado");
 
         }
+
 
 
         [Route("Get-Chismes")]
         [HttpGet]
-        public HttpResponseMessage GetChismes()
+        public IHttpActionResult GetChismes()
         {
             var chismes = _chismeServices.GetAllChismes();
             if (chismes != null || chismes.Count > 0)
             {
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new ObjectContent<List<ChismeModel>>(chismes, new JsonMediaTypeFormatter())
-                };
+                return Ok(chismes);
             }
-            return new HttpResponseMessage(HttpStatusCode.NotFound);
+            return Content(HttpStatusCode.NotFound, "Aun no hay registros en la coleccion Chismes");
 
         }
+
+
 
         [Route("Get-One-Chisme")]
         [HttpGet]
-        public HttpResponseMessage GetChisme(string id)
+        public IHttpActionResult GetChisme(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("Falta el parámetro ID para hacer la consulta");
+            }
             var chisme = _chismeServices.GetOneChisme(id);
             if (chisme != null)
             {
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new ObjectContent<ChismeModel>(chisme, new JsonMediaTypeFormatter())
-                };
+                return Ok(chisme);
             }
-            return new HttpResponseMessage(HttpStatusCode.NotFound);
+            return Content(HttpStatusCode.NotFound, "No hay coincidencias en la base de datos");
 
         }
 
+
+
         [Route("Update-Chisme")]
         [HttpPut]
-        public HttpResponseMessage Update(string id, ChismeModel chismeactualizado)
+        public IHttpActionResult Update(string id, ChismeModel datos)
         {
-            if (id != null && chismeactualizado != null)
+            if (string.IsNullOrEmpty(id) || datos == null)
             {
-                _chismeServices.UpdateChisme(id, chismeactualizado);
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new ObjectContent<ChismeModel>(chismeactualizado, new JsonMediaTypeFormatter())
-                };
+                return BadRequest("Parámetros incompeltos");
             }
-            return new HttpResponseMessage(HttpStatusCode.Conflict)
+            var chismefound = _chismeServices.GetOneChisme(id);
+            if (chismefound != null)
             {
-                Content = new StringContent("Los datos no fueron dados correctamente")
-            };
+                chismefound.Titulo = string.IsNullOrEmpty(datos.Titulo) ? chismefound.Titulo : datos.Titulo;
+                chismefound.Contexto = string.IsNullOrEmpty(datos.Contexto) ? chismefound.Contexto : datos.Contexto;
+                chismefound.Categorias = datos.Categorias ?? chismefound.Categorias;
+
+                var updatedChisme = _chismeServices.UpdateChisme(id, chismefound);
+                return Ok(updatedChisme);
+
+            }
+            return Content(HttpStatusCode.NotFound, "No hubo coincidencias en la BD");
+        }
+
+
+        [Route("Category-search")]
+        [HttpGet]
+        public IHttpActionResult GetCategory(string category)
+        {
+            if (string.IsNullOrEmpty(category))
+            {
+                return BadRequest("No se proporcionó la categoria");
+            }
+            var chismes = _chismeServices.GetByCategory(category);
+
+            if (chismes == null || chismes.Count == 0)
+            {
+                return Content(HttpStatusCode.NotFound, "No hay chismes de dicha categoria");
+            }
+
+            return Ok(chismes);
+
         }
 
     }

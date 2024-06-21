@@ -14,7 +14,7 @@ namespace ChisUTABackend.Services
 
         public ChismeServices()
         {
-           
+
             _chismeModel = _database.GetCollection<ChismeModel>("Chismes");
         }
 
@@ -30,9 +30,19 @@ namespace ChisUTABackend.Services
         // obtener un solo chisme
         public ChismeModel GetOneChisme(string id)
         {
-            var chismeFound =_chismeModel.Find(chisme => chisme.Id == id).FirstOrDefault();
+            var chismeFound = _chismeModel.Find(chisme => chisme.Id == id).FirstOrDefault();
             return chismeFound;
         }
+
+        public List<ChismeModel> GetByCategory(string category)
+        {
+            var builder = Builders<ChismeModel>.Filter;
+            var filtro = builder.AnyEq(f => f.Categorias, category);
+            var chismes = _chismeModel.Find(filtro).ToList();
+            return chismes;
+
+        }
+
         #endregion
 
         #region Post
@@ -47,8 +57,13 @@ namespace ChisUTABackend.Services
         // actualizar un chisme
         public ChismeModel UpdateChisme(string id, ChismeModel chismeactualizado)
         {
-            chismeactualizado.Id = id;
-            _chismeModel.ReplaceOne(chisme => chisme.Id == id, chismeactualizado);
+
+            var update = Builders<ChismeModel>.Update
+                .Set(chisme => chisme.Titulo, chismeactualizado.Titulo)
+                .Set(chisme => chisme.Contexto, chismeactualizado.Contexto)
+                .Set(chisme => chisme.Categorias, chismeactualizado.Categorias);
+
+            _chismeModel.UpdateOne(chisme => chisme.Id == id, update);
             return chismeactualizado;
         }
 
@@ -58,7 +73,7 @@ namespace ChisUTABackend.Services
         // eliminar un chisme
         public void DeleteChisme(string id)
         {
-            _chismeModel.DeleteOne(chisme=> chisme.Id == id);
+            _chismeModel.DeleteOne(chisme => chisme.Id == id);
         }
 
         #endregion
