@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using MongoDB.Bson.Serialization.Attributes;
+
 
 namespace ChisUTABackend.Models
 {
@@ -19,6 +17,7 @@ namespace ChisUTABackend.Models
     #region Users
     public partial class Users
     {
+        [BsonIgnore]
         public string ConfirmPassword { get; set; }
     }
 

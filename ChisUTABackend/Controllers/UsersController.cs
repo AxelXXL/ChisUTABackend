@@ -1,10 +1,5 @@
-﻿using ChisUTABackend.Data;
-using ChisUTABackend.Models;
+﻿using ChisUTABackend.Models;
 using ChisUTABackend.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Http;
 
 namespace ChisUTABackend.Controllers
@@ -27,6 +22,14 @@ namespace ChisUTABackend.Controllers
         public ChisUtaResponse RegisterUser(Users user)
         {
             return _userServices.RegisterUser(user);
+        }
+
+        [Auth]
+        [Route("api/Login", Name = "Login")]
+        [HttpPost]
+        public ChisUtaResponse Login(Users users)
+        {
+            return _userServices.Login(users);
         }
     }
 }

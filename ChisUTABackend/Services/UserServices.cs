@@ -21,7 +21,7 @@ namespace ChisUTABackend.Services
         }
         #endregion
 
-
+        #region Registro
         public ChisUtaResponse RegisterUser(Users newUser)
         {
             var filter = Builders<Users>.Filter.And( Builders<Users>.Filter.Exists("Email"), Builders<Users>.Filter.Eq("Email", newUser.Email));
@@ -66,5 +66,57 @@ namespace ChisUTABackend.Services
                 }
             };
         }
+        #endregion
+
+        #region Login
+
+        public ChisUtaResponse Login(Users userLogged)
+        {
+            try
+            {
+                string encryptedPassword = Security.Encrypt(userLogged.Password);
+
+                var filter = Builders<Users>.Filter.And(Builders<Users>.Filter.Eq(u => u.Email, userLogged.Email),
+                    Builders<Users>.Filter.Eq(u => u.Password, encryptedPassword));
+
+                var existingUser = _users.Find(filter).FirstOrDefault();
+
+                if (existingUser == null)
+                {
+                    return new ChisUtaResponse
+                    {
+                        Success = false,
+                        Message = "Credenciales inválidas.",
+                        Data = null
+                    };
+                }
+                else
+                {
+                    return new ChisUtaResponse
+                    {
+                        Success = true,
+                        Message = "Usuario logueado con éxito.",
+                        Data = new Users
+                        {
+                            Id = existingUser.Id,
+                            Email = existingUser.Email,
+                            Name = existingUser.Name
+                        }
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ChisUtaResponse
+                {
+                    Success = false,
+                    Message = "Ocurrió un error durante el inicio de sesión.",
+                    Data = ex.Message 
+                };
+            }
+        }
+
+
+        #endregion
     }
 }
