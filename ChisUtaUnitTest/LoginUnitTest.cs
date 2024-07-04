@@ -15,8 +15,8 @@ namespace ChisUtaUnitTest
 
             Users newUser = new Users()
             {
-                Name = "Axel",
-                Email = "emaildeprueba@gmail.com",
+                Name = "Axel2",
+                Email = "emaildeprueba2@gmail.com",
                 Password = "unacontraseña@",
                 ConfirmPassword = "unacontraseña@"
             };

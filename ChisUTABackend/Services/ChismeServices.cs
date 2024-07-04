@@ -47,10 +47,52 @@ namespace ChisUTABackend.Services
 
         #region Post
         // crear un nuevo chisme
-        public ChismeModel PostChisme(ChismeModel chisme)
+        public ChisUtaResponse PostChisme(ChismeModel chisme)
         {
-            _chismeModel.InsertOne(chisme);
-            return chisme;
+            ChisUtaResponse response = new ChisUtaResponse();
+
+            if (chisme != null)
+            {
+                if (chisme.Titulo == null)
+                {
+                    response = new ChisUtaResponse()
+                    {
+                        Success = false,
+                        Message = "Falta proporcionar el título"
+                    };
+
+                    return response;
+                }
+                if (chisme.Contexto == null)
+                {
+                    response = new ChisUtaResponse()
+                    {
+                        Success = false,
+                        Message = "Falta proporcionar el contexto"
+                    };
+
+                    return response;
+                }
+                if (chisme.Categorias == null)
+                {
+                    response = new ChisUtaResponse()
+                    {
+                        Success = false,
+                        Message = "Falta proporcionar la categoria"
+                    };
+
+                    return response;
+                }
+
+                _chismeModel.InsertOne(chisme);
+                response = new ChisUtaResponse()
+                {
+                    Success = true,
+                    Message = "Chisme guardado correctamente."
+                };
+            }
+           
+            return response;
 
         }
 

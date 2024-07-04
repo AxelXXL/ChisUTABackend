@@ -1,10 +1,9 @@
 ﻿using ChisUTABackend.Models;
 using ChisUTABackend.Services;
-using System.Collections.Generic;
-using System.Linq;
+using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Web.Http;
 
 namespace ChisUTABackend.Controllers
@@ -23,26 +22,16 @@ namespace ChisUTABackend.Controllers
 
         [Route("Post-Chisme")]
         [HttpPost]
-        public IHttpActionResult Post(ChismeModel chisme)
+        public HttpResponseMessage Post(ChismeModel chisme)
         {
-            if (chisme != null)
-            {
-                if (chisme.Titulo == null)
-                {
-                    return BadRequest("Falta proporcionar el título");
-                }
-                if (chisme.Contexto == null)
-                {
-                    return BadRequest("Falta proporcionar el contexto");
-                }
-                if (chisme.Categorias == null)
-                {
-                    return BadRequest("Falta proporcionar la categoria");
-                }
-                _chismeServices.PostChisme(chisme);
-                return Ok(chisme);
-            }
-            return Conflict();
+            ChisUtaResponse postChisme = _chismeServices.PostChisme(chisme);
+
+            var response = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Content = new StringContent(JsonConvert.SerializeObject(postChisme));
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            return response;
         }
 
 
