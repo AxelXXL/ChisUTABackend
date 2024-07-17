@@ -1,13 +1,14 @@
 ﻿using ChisUTABackend.Models;
 using ChisUTABackend.Services;
 using Newtonsoft.Json;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace ChisUTABackend.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ChismeController : ApiController
     {
         #region Configurations
@@ -34,8 +35,6 @@ namespace ChisUTABackend.Controllers
             return response;
         }
 
-
-
         [Route("Delete-Chisme")]
         [HttpDelete]
         public IHttpActionResult Delete(string id)
@@ -49,15 +48,12 @@ namespace ChisUTABackend.Controllers
 
             if (chisme == null)
             {
-                return Content(HttpStatusCode.NotFound, "No hay coincidencias en la BD");
+                return Content(System.Net.HttpStatusCode.NotFound, "No hay coincidencias en la BD");
             }
 
             _chismeServices.DeleteChisme(id);
             return Ok("Chisme eliminado");
-
         }
-
-
 
         [Route("Get-Chismes")]
         [HttpGet]
@@ -68,11 +64,8 @@ namespace ChisUTABackend.Controllers
             {
                 return Ok(chismes);
             }
-            return Content(HttpStatusCode.NotFound, "Aun no hay registros en la coleccion Chismes");
-
+            return Content(System.Net.HttpStatusCode.NotFound, "Aun no hay registros en la coleccion Chismes");
         }
-
-
 
         [Route("Get-One-Chisme")]
         [HttpGet]
@@ -87,11 +80,8 @@ namespace ChisUTABackend.Controllers
             {
                 return Ok(chisme);
             }
-            return Content(HttpStatusCode.NotFound, "No hay coincidencias en la base de datos");
-
+            return Content(System.Net.HttpStatusCode.NotFound, "No hay coincidencias en la base de datos");
         }
-
-
 
         [Route("Update-Chisme")]
         [HttpPut]
@@ -99,7 +89,7 @@ namespace ChisUTABackend.Controllers
         {
             if (string.IsNullOrEmpty(id) || datos == null)
             {
-                return BadRequest("Parámetros incompeltos");
+                return BadRequest("Parámetros incompletos");
             }
             var chismefound = _chismeServices.GetOneChisme(id);
             if (chismefound != null)
@@ -110,11 +100,9 @@ namespace ChisUTABackend.Controllers
 
                 var updatedChisme = _chismeServices.UpdateChisme(id, chismefound);
                 return Ok(updatedChisme);
-
             }
-            return Content(HttpStatusCode.NotFound, "No hubo coincidencias en la BD");
+            return Content(System.Net.HttpStatusCode.NotFound, "No hubo coincidencias en la BD");
         }
-
 
         [Route("Category-search")]
         [HttpGet]
@@ -128,12 +116,10 @@ namespace ChisUTABackend.Controllers
 
             if (chismes == null || chismes.Count == 0)
             {
-                return Content(HttpStatusCode.NotFound, "No hay chismes de dicha categoria");
+                return Content(System.Net.HttpStatusCode.NotFound, "No hay chismes de dicha categoria");
             }
 
             return Ok(chismes);
-
         }
-
     }
 }

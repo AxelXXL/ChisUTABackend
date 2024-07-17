@@ -1,126 +1,58 @@
 ﻿using ChisUTABackend.Models;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-
 
 namespace ChisUTABackend.Services
 {
-    public class ChismeServices : BaseServices
+    public class ChismeServices
     {
-
-        #region Configurations
-        private readonly IMongoCollection<ChismeModel> _chismeModel;
+        #region Configurations 
+        private readonly IMongoCollection<ChismeModel> _chismes;
+        private readonly MongoDbContext _context;
 
         public ChismeServices()
         {
-
-            _chismeModel = _database.GetCollection<ChismeModel>("Chismes");
+            _context = new MongoDbContext();
+            _chismes = _context.Database.GetCollection<ChismeModel>("Chismes");
         }
-
         #endregion
 
-        #region Get
-        // obtener todos los chismes de la coleccion
-        public List<ChismeModel> GetAllChismes()
+        public ChisUtaResponse PostChisme(ChismeModel chisme)
         {
-            return _chismeModel.Find(chisme => true).ToList();
+            _chismes.InsertOne(chisme);
+            return new ChisUtaResponse
+            {
+                Success = true,
+                Message = "Chisme registrado con éxito",
+                Data = chisme
+            };
         }
 
-        // obtener un solo chisme
         public ChismeModel GetOneChisme(string id)
         {
-            var chismeFound = _chismeModel.Find(chisme => chisme.Id == id).FirstOrDefault();
-            return chismeFound;
+            return _chismes.Find(ch => ch.Id == id).FirstOrDefault();
+        }
+
+        public List<ChismeModel> GetAllChismes()
+        {
+            return _chismes.Find(ch => true).ToList();
+        }
+
+        public void DeleteChisme(string id)
+        {
+            _chismes.DeleteOne(ch => ch.Id == id);
+        }
+
+        public ChismeModel UpdateChisme(string id, ChismeModel chisme)
+        {
+            _chismes.ReplaceOne(ch => ch.Id == id, chisme);
+            return chisme;
         }
 
         public List<ChismeModel> GetByCategory(string category)
         {
-            var builder = Builders<ChismeModel>.Filter;
-            var filtro = builder.AnyEq(f => f.Categorias, category);
-            var chismes = _chismeModel.Find(filtro).ToList();
-            return chismes;
-
+            return _chismes.Find(ch => ch.Categorias.Contains(category)).ToList();
         }
-
-        #endregion
-
-        #region Post
-        // crear un nuevo chisme
-        public ChisUtaResponse PostChisme(ChismeModel chisme)
-        {
-            ChisUtaResponse response = new ChisUtaResponse();
-
-            if (chisme != null)
-            {
-                if (chisme.Titulo == null)
-                {
-                    response = new ChisUtaResponse()
-                    {
-                        Success = false,
-                        Message = "Falta proporcionar el título"
-                    };
-
-                    return response;
-                }
-                if (chisme.Contexto == null)
-                {
-                    response = new ChisUtaResponse()
-                    {
-                        Success = false,
-                        Message = "Falta proporcionar el contexto"
-                    };
-
-                    return response;
-                }
-                if (chisme.Categorias == null)
-                {
-                    response = new ChisUtaResponse()
-                    {
-                        Success = false,
-                        Message = "Falta proporcionar la categoria"
-                    };
-
-                    return response;
-                }
-
-                _chismeModel.InsertOne(chisme);
-                response = new ChisUtaResponse()
-                {
-                    Success = true,
-                    Message = "Chisme guardado correctamente."
-                };
-            }
-           
-            return response;
-
-        }
-
-        // actualizar un chisme
-        public ChismeModel UpdateChisme(string id, ChismeModel chismeactualizado)
-        {
-
-            var update = Builders<ChismeModel>.Update
-                .Set(chisme => chisme.Titulo, chismeactualizado.Titulo)
-                .Set(chisme => chisme.Contexto, chismeactualizado.Contexto)
-                .Set(chisme => chisme.Categorias, chismeactualizado.Categorias);
-
-            _chismeModel.UpdateOne(chisme => chisme.Id == id, update);
-            return chismeactualizado;
-        }
-
-        #endregion
-
-        #region Delete
-        // eliminar un chisme
-        public void DeleteChisme(string id)
-        {
-            _chismeModel.DeleteOne(chisme => chisme.Id == id);
-        }
-
-        #endregion
-
-
-
     }
 }
