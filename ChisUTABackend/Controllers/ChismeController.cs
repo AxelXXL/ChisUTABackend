@@ -1,14 +1,13 @@
 ﻿using ChisUTABackend.Models;
 using ChisUTABackend.Services;
 using Newtonsoft.Json;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
-using System.Web.Http.Cors;
 
 namespace ChisUTABackend.Controllers
 {
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ChismeController : ApiController
     {
         #region Configurations
@@ -35,91 +34,87 @@ namespace ChisUTABackend.Controllers
             return response;
         }
 
+
+
         [Route("Delete-Chisme")]
-        [HttpDelete]
-        public IHttpActionResult Delete(string id)
+        [HttpPost]
+        public HttpResponseMessage Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("Falta el parámetro ID para hacer la consulta");
-            }
+            ChisUtaResponse deleteChisme = _chismeServices.DeleteChisme(id);
 
-            var chisme = _chismeServices.GetOneChisme(id);
+            var response = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Content = new StringContent(JsonConvert.SerializeObject(deleteChisme));
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            if (chisme == null)
-            {
-                return Content(System.Net.HttpStatusCode.NotFound, "No hay coincidencias en la BD");
-            }
-
-            _chismeServices.DeleteChisme(id);
-            return Ok("Chisme eliminado");
+            return response;
         }
+
+
 
         [Route("Get-Chismes")]
         [HttpGet]
-        public IHttpActionResult GetChismes()
+        public HttpResponseMessage GetChismes()
         {
-            var chismes = _chismeServices.GetAllChismes();
-            if (chismes != null || chismes.Count > 0)
-            {
-                return Ok(chismes);
-            }
-            return Content(System.Net.HttpStatusCode.NotFound, "Aun no hay registros en la coleccion Chismes");
+            ChisUtaResponse getChismes = _chismeServices.GetAllChismes();
+
+            var response = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Content = new StringContent(JsonConvert.SerializeObject(getChismes));
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            return response;
+
         }
+
+
 
         [Route("Get-One-Chisme")]
         [HttpGet]
-        public IHttpActionResult GetChisme(string id)
+        public HttpResponseMessage GetChisme(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("Falta el parámetro ID para hacer la consulta");
-            }
-            var chisme = _chismeServices.GetOneChisme(id);
-            if (chisme != null)
-            {
-                return Ok(chisme);
-            }
-            return Content(System.Net.HttpStatusCode.NotFound, "No hay coincidencias en la base de datos");
+            ChisUtaResponse getChisme = _chismeServices.GetOneChisme(id);
+
+            var response = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Content = new StringContent(JsonConvert.SerializeObject(getChisme));
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            return response;
+
         }
+
+
 
         [Route("Update-Chisme")]
         [HttpPut]
-        public IHttpActionResult Update(string id, ChismeModel datos)
+        public HttpResponseMessage Update(string id, ChismeModel datos)
         {
-            if (string.IsNullOrEmpty(id) || datos == null)
-            {
-                return BadRequest("Parámetros incompletos");
-            }
-            var chismefound = _chismeServices.GetOneChisme(id);
-            if (chismefound != null)
-            {
-                chismefound.Titulo = string.IsNullOrEmpty(datos.Titulo) ? chismefound.Titulo : datos.Titulo;
-                chismefound.Contexto = string.IsNullOrEmpty(datos.Contexto) ? chismefound.Contexto : datos.Contexto;
-                chismefound.Categorias = datos.Categorias ?? chismefound.Categorias;
+            ChisUtaResponse updateChisme = _chismeServices.UpdateChisme(id, datos);
 
-                var updatedChisme = _chismeServices.UpdateChisme(id, chismefound);
-                return Ok(updatedChisme);
-            }
-            return Content(System.Net.HttpStatusCode.NotFound, "No hubo coincidencias en la BD");
+            var response = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Content = new StringContent(JsonConvert.SerializeObject(updateChisme));
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            return response;
         }
+
 
         [Route("Category-search")]
         [HttpGet]
-        public IHttpActionResult GetCategory(string category)
+        public HttpResponseMessage GetCategory(string category)
         {
-            if (string.IsNullOrEmpty(category))
-            {
-                return BadRequest("No se proporcionó la categoria");
-            }
-            var chismes = _chismeServices.GetByCategory(category);
+            ChisUtaResponse getCategory = _chismeServices.GetByCategory(category);
 
-            if (chismes == null || chismes.Count == 0)
-            {
-                return Content(System.Net.HttpStatusCode.NotFound, "No hay chismes de dicha categoria");
-            }
+            var response = Request.CreateResponse(System.Net.HttpStatusCode.OK);
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Content = new StringContent(JsonConvert.SerializeObject(getCategory));
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            return Ok(chismes);
+            return response;
+
         }
+
     }
 }
